@@ -1,9 +1,8 @@
 {
   "tasks": {
-    "dev": "deno run -A --watch main.ts",
-    "start": "deno run -A main.ts"
-  },
-  "imports": {
-    "@/": "./src/"
+    "dev": "deno run -A --watch main.ts -e=janet -c='janet example/hello.janet'",
+    "start": "deno run -A main.ts -e=janet -c='janet example/hello.janet'",
+    "install": "deno install -A -n denow -f main.ts",
+    "cache": "deno cache deps.ts"
   }
 }
