@@ -1,3 +1,5 @@
+import * as log from "./log.ts";
+
 const commandRunner = function (command: string) {
   let process: Deno.ChildProcess | undefined;
 
@@ -18,11 +20,7 @@ const commandRunner = function (command: string) {
 
     (async () => {
       await process!.output();
-      console.log(
-        `%cDenoW%c Process ended. Waiting for file changes...`,
-        "color: #09f; font-weight: bold",
-        "color: unset"
-      );
+      log.processEnded();
     })();
   }
 

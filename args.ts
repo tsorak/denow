@@ -1,14 +1,12 @@
-// function parseToArray(extensionSpecifier: string): string[] | null {
-//   try {
-//     const parsed = JSON.parse(extensionSpecifier);
-//     if (Array.isArray(parsed)) {
-//       return parsed;
-//     }
-//     return null;
-//   } catch (_) {
-//     throw new Error(`${extensionSpecifier} is not parsable as an array`);
-//   }
-// }
+import { std_path } from "./deps.ts";
+const { resolve } = std_path;
+
+function ensureStartsWithDot(ext: string): string {
+  if (!ext.startsWith(".")) {
+    return `.${ext}`;
+  }
+  return ext;
+}
 
 function parseExtensionSpecifier(specifier: string): string[] {
   if (!specifier) {
@@ -19,31 +17,35 @@ function parseExtensionSpecifier(specifier: string): string[] {
     return [specifier];
   }
 
-  return specifier.split(",");
+  return specifier.split(",").map((ext) => ensureStartsWithDot(ext));
 }
 
 function parseArgs(args: string[]): {
   watchExtensions: string[];
   command: string;
+  watchDir: string;
 } {
   const parsed: ReturnType<typeof parseArgs> = {
     watchExtensions: [],
     command: "",
+    watchDir: resolve(Deno.cwd(), Deno.env.get("DENOW_WATCHDIR") ?? ""),
   };
 
   args.forEach((arg) => {
-    if (arg.startsWith("-c=")) {
-      parsed.command = arg.slice(3);
-    } else if (arg.startsWith("-e=")) {
-      parsed.watchExtensions = parseExtensionSpecifier(arg.slice(3));
+    const opt = arg.slice(0, 3);
+    switch (opt) {
+      case "-c=":
+        parsed.command = arg.slice(3);
+        return;
+      case "-e=":
+        parsed.watchExtensions = parseExtensionSpecifier(arg.slice(3));
+        return;
+      case "-d=":
+        parsed.watchDir = resolve(Deno.cwd(), arg.slice(3));
+        return;
+      default:
+        break;
     }
-  });
-
-  parsed.watchExtensions = parsed.watchExtensions.map((ext) => {
-    if (!ext.startsWith(".")) {
-      return `.${ext}`;
-    }
-    return ext;
   });
 
   return parsed;
